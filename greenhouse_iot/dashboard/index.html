@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenSense — Greenhouse Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="layout">
+      <button type="button" class="nav-toggle" id="navToggle" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-backdrop" id="navBackdrop" hidden></div>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">🌿</span>
+          <div>
+            <div class="brand-title">GreenSense</div>
+            <div class="brand-version">v1.0</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <div class="nav-label">Overview</div>
+          <a class="nav-link nav-link--dash active" href="index.html">Dashboard</a>
+          <a class="nav-link" href="#alerts" id="navAlertsLink">
+            Alerts
+            <span class="badge" id="navAlertBadge">0</span>
+          </a>
+
+          <div class="nav-label">Sensors</div>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=temperature" data-sensor="temperature">Temperature</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=humidity" data-sensor="humidity">Humidity</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=soil" data-sensor="soil">Soil Moisture</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=light" data-sensor="light">Light Level</a>
+
+          <div class="nav-label">Actuators</div>
+          <a class="nav-link" href="#card-fan">Exhaust fan</a>
+          <a class="nav-link" href="#card-pump">Water pump</a>
+          <a class="nav-link" href="#card-light-act">Grow lights</a>
+
+          <div class="nav-label">Analytics</div>
+          <a class="nav-link" href="#chart-section">Predictions</a>
+          <a class="nav-link" href="#actuators">Actuators</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="dot dot--ok"></span>
+          <span id="sidebarSensorLine">3 sensors online · Zone A</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+            <p class="api-error" id="apiError" hidden></p>
+            <p class="data-source" id="dataSourceNote" hidden></p>
+          </div>
+          <div class="topbar-right">
+            <div class="pill pill--warn" id="pillSummary">No warnings</div>
+            <div class="pill" id="pillUpdated">Updated —</div>
+            <div class="avatar" title="User">GS</div>
+          </div>
+        </header>
+
+        <div class="main-stack" id="dashboardView">
+        <section class="cards" id="dashboard">
+          <article class="card card--sensor-link" id="card-temp" role="button" tabindex="0">
+            <div class="card-head">
+              <span class="card-title">Temperature</span>
+              <span class="card-icon">🌡️</span>
+            </div>
+            <div class="card-value" id="valTemp">—</div>
+            <div class="card-status" id="statusTemp">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="card-bar"><div class="card-bar-fill" id="barTemp" style="width: 0%"></div></div>
+          </article>
+
+          <article class="card card--sensor-link" id="card-hum" role="button" tabindex="0">
+            <div class="card-head">
+              <span class="card-title">Humidity</span>
+              <span class="card-icon">💧</span>
+            </div>
+            <div class="card-value" id="valHum">—</div>
+            <div class="card-status" id="statusHum">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="card-bar card-bar--hum"><div class="card-bar-fill" id="barHum" style="width: 0%"></div></div>
+          </article>
+
+          <article class="card card--sensor-link" id="card-soil" role="button" tabindex="0">
+            <div class="card-head">
+              <span class="card-title">Soil Moisture</span>
+              <span class="card-icon">🪴</span>
+            </div>
+            <div class="card-value" id="valSoil">—</div>
+            <div class="card-status" id="statusSoil">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="card-bar card-bar--soil"><div class="card-bar-fill" id="barSoil" style="width: 0%"></div></div>
+          </article>
+
+          <article class="card card--sensor-link" id="card-light" role="button" tabindex="0">
+            <div class="card-head">
+              <span class="card-title">Light Level</span>
+              <span class="card-icon">☀️</span>
+            </div>
+            <div class="card-value" id="valLight">—</div>
+            <div class="card-status" id="statusLight">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="card-bar card-bar--light"><div class="card-bar-fill" id="barLight" style="width: 0%"></div></div>
+          </article>
+        </section>
+
+        <section class="mid-grid" id="chart-section">
+          <div class="panel chart-panel">
+            <h2 class="panel-title">24-hour sensor trend (normalised)</h2>
+            <div class="chart-wrap">
+              <canvas id="trendChart" height="280"></canvas>
+            </div>
+            <div class="chart-legend" id="chartLegend"></div>
+          </div>
+
+          <div class="panel alerts-panel" id="alerts">
+            <h2 class="panel-title">Active alerts</h2>
+            <div class="alerts-list" id="alertsList">
+              <div class="alert alert--info">
+                <span class="alert-icon">ℹ️</span>
+                <div>Connect the ESP32 and REST API to see live readings.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cards cards--actuators" id="actuators" aria-label="Actuators">
+          <article class="card card--actuator" id="card-fan">
+            <div class="card-head">
+              <span class="card-title">Exhaust fan</span>
+              <span class="card-icon">🌀</span>
+            </div>
+            <div class="card-value card-value--actuator" id="valFan">—</div>
+            <div class="card-status" id="statusFan">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="actuator-controls">
+              <label class="toggle-row">
+                <input type="checkbox" id="chkAutoFan" checked />
+                <span>Automate (temperature)</span>
+              </label>
+              <div class="actuator-btn-row">
+                <button type="button" class="btn-toggle" id="btnFanOn">Fan on</button>
+                <button type="button" class="btn-toggle" id="btnFanOff">Fan off</button>
+              </div>
+            </div>
+            <dl class="actuator-details">
+              <div>
+                <dt>Last activation</dt>
+                <dd id="fanActivated">—</dd>
+              </div>
+              <div>
+                <dt>On this run</dt>
+                <dd id="fanCurrentOn">—</dd>
+              </div>
+              <div>
+                <dt>Total on (session)</dt>
+                <dd id="fanTotalOn">—</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="card card--actuator" id="card-pump">
+            <div class="card-head">
+              <span class="card-title">Water pump</span>
+              <span class="card-icon">💧</span>
+            </div>
+            <div class="card-value card-value--actuator" id="valPump">—</div>
+            <div class="card-status" id="statusPump">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="actuator-controls">
+              <label class="toggle-row">
+                <input type="checkbox" id="chkAutoPump" checked />
+                <span>Automate (soil moisture)</span>
+              </label>
+              <div class="actuator-btn-row">
+                <button type="button" class="btn-toggle" id="btnPumpOn">Pump on</button>
+                <button type="button" class="btn-toggle" id="btnPumpOff">Pump off</button>
+              </div>
+            </div>
+            <dl class="actuator-details">
+              <div>
+                <dt>Last activation</dt>
+                <dd id="pumpActivated">—</dd>
+              </div>
+              <div>
+                <dt>On this pulse</dt>
+                <dd id="pumpCurrentOn">—</dd>
+              </div>
+              <div>
+                <dt>Total on (session)</dt>
+                <dd id="pumpTotalOn">—</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="card card--actuator" id="card-light-act">
+            <div class="card-head">
+              <span class="card-title">Grow lights</span>
+              <span class="card-icon">💡</span>
+            </div>
+            <div class="card-value card-value--actuator" id="valLightAct">—</div>
+            <div class="card-status" id="statusLightAct">
+              <span class="dot dot--muted"></span>
+              <span>Waiting for data</span>
+            </div>
+            <div class="actuator-controls">
+              <label class="toggle-row">
+                <input type="checkbox" id="chkAutoLight" />
+                <span>Automate (ambient LDR — off = manual only)</span>
+              </label>
+              <div class="actuator-btn-row">
+                <button type="button" class="btn-toggle" id="btnLightOn">Lights on</button>
+                <button type="button" class="btn-toggle" id="btnLightOff">Lights off</button>
+              </div>
+            </div>
+            <dl class="actuator-details">
+              <div>
+                <dt>Last activation</dt>
+                <dd id="lightActivated">—</dd>
+              </div>
+              <div>
+                <dt>On this run</dt>
+                <dd id="lightCurrentOn">—</dd>
+              </div>
+              <div>
+                <dt>Total on (session)</dt>
+                <dd id="lightTotalOn">—</dd>
+              </div>
+            </dl>
+          </article>
+        </section>
+
+        <footer class="health-bar">
+          <div class="health-title">Sensor health</div>
+          <div class="health-items" id="healthItems">
+            <div class="health-chip">
+              <span class="dot dot--ok"></span>
+              <strong>DHT11</strong>
+              <span>Zone A · temp + humidity</span>
+            </div>
+            <div class="health-chip">
+              <span class="dot dot--ok"></span>
+              <strong>Soil probe</strong>
+              <span>Capacitive · moisture</span>
+            </div>
+            <div class="health-chip">
+              <span class="dot dot--ok"></span>
+              <strong>LDR</strong>
+              <span>Light intensity</span>
+            </div>
+          </div>
+        </footer>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenSense — Sensor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="layout">
+      <button type="button" class="nav-toggle" id="navToggle" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-backdrop" id="navBackdrop" hidden></div>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">🌿</span>
+          <div>
+            <div class="brand-title">GreenSense</div>
+            <div class="brand-version">v1.0</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <div class="nav-label">Overview</div>
+          <a class="nav-link nav-link--dash" href="index.html">Dashboard</a>
+          <a class="nav-link" href="index.html#alerts" id="navAlertsLink">
+            Alerts
+            <span class="badge" id="navAlertBadge">0</span>
+          </a>
+
+          <div class="nav-label">Sensors</div>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=temperature" data-sensor="temperature">Temperature</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=humidity" data-sensor="humidity">Humidity</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=soil" data-sensor="soil">Soil Moisture</a>
+          <a class="nav-link nav-link--sensor" href="sensor.html?sensor=light" data-sensor="light">Light Level</a>
+
+          <div class="nav-label">Actuators</div>
+          <a class="nav-link" href="index.html#card-fan">Exhaust fan</a>
+          <a class="nav-link" href="index.html#card-pump">Water pump</a>
+          <a class="nav-link" href="index.html#card-light-act">Grow lights</a>
+
+          <div class="nav-label">Analytics</div>
+          <a class="nav-link" href="index.html#chart-section">Predictions</a>
+          <a class="nav-link" href="index.html#actuators">Actuators</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="dot dot--ok"></span>
+          <span id="sidebarSensorLine">3 sensors online · Zone A</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1 class="page-title" id="pageTitle">Sensor</h1>
+            <p class="api-error" id="apiError" hidden></p>
+            <p class="data-source" id="dataSourceNote" hidden></p>
+          </div>
+          <div class="topbar-right">
+            <div class="pill pill--warn" id="pillSummary">No warnings</div>
+            <div class="pill" id="pillUpdated">Updated —</div>
+            <div class="avatar" title="User">GS</div>
+          </div>
+        </header>
+
+        <div class="main-stack sensor-page" id="sensorView">
+          <section class="cards cards--sensor-kpis" id="sensorKpis">
+            <article class="card sensor-kpi">
+              <div class="card-head">
+                <span class="card-title" id="sdKpi1Label">Current</span>
+                <span class="card-icon" id="sdKpi1Icon">🌡️</span>
+              </div>
+              <div class="card-value" id="sdKpi1Value">—</div>
+              <div class="card-status" id="sdKpi1Status"><span class="dot dot--muted"></span><span>—</span></div>
+              <div class="card-bar"><div class="card-bar-fill" id="sdKpi1Bar" style="width: 0%"></div></div>
+            </article>
+            <article class="card sensor-kpi">
+              <div class="card-head">
+                <span class="card-title" id="sdKpi2Label">Today max</span>
+                <span class="card-icon" id="sdKpi2Icon">📈</span>
+              </div>
+              <div class="card-value" id="sdKpi2Value">—</div>
+              <div class="card-status" id="sdKpi2Status"><span class="dot dot--muted"></span><span>—</span></div>
+              <div class="card-bar"><div class="card-bar-fill" id="sdKpi2Bar" style="width: 0%"></div></div>
+            </article>
+            <article class="card sensor-kpi" id="sdKpi3Card">
+              <div class="card-head">
+                <span class="card-title" id="sdKpi3Label">Today min</span>
+                <span class="card-icon" id="sdKpi3Icon">📉</span>
+              </div>
+              <div class="card-value" id="sdKpi3Value">—</div>
+              <div class="card-status" id="sdKpi3Status"><span class="dot dot--muted"></span><span>—</span></div>
+              <div class="card-bar" id="sdKpi3BarWrap"><div class="card-bar-fill" id="sdKpi3Bar" style="width: 0%"></div></div>
+              <div class="sensor-kpi-badge" id="sdKpi3Badge" hidden></div>
+            </article>
+            <article class="card sensor-kpi sensor-kpi--gauge">
+              <div class="card-head">
+                <span class="card-title" id="sdGaugeTitle">Gauge</span>
+                <span class="card-icon" id="sdGaugeIcon">◎</span>
+              </div>
+              <div class="sensor-gauge" id="sensorGauge">
+                <svg class="sensor-gauge__svg" viewBox="0 0 200 110" aria-hidden="true">
+                  <path
+                    d="M 25 100 A 75 75 0 0 1 175 100"
+                    fill="none"
+                    stroke="var(--border)"
+                    stroke-width="14"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    id="sdGaugeArcWarn"
+                    d="M 25 100 A 75 75 0 0 1 175 100"
+                    fill="none"
+                    stroke="rgba(245, 158, 11, 0.35)"
+                    stroke-width="14"
+                    stroke-linecap="round"
+                    pathLength="100"
+                    stroke-dasharray="35 100"
+                    stroke-dashoffset="0"
+                  />
+                  <line
+                    id="sdGaugeNeedle"
+                    x1="100"
+                    y1="100"
+                    x2="100"
+                    y2="38"
+                    stroke="#1e293b"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    transform="rotate(0 100 100)"
+                  />
+                </svg>
+                <div class="sensor-gauge__readout" id="sdGaugeReadout">—</div>
+                <div class="sensor-gauge__sublabel" id="sdGaugeSublabel"></div>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel sensor-chart-panel">
+            <h2 class="panel-title" id="sensorChartTitle">History</h2>
+            <div class="chart-wrap chart-wrap--sensor">
+              <canvas id="sensorTrendChart" height="280"></canvas>
+            </div>
+          </section>
+
+          <div class="sensor-bottom-grid">
+            <div class="panel sensor-threshold-panel">
+              <h2 class="panel-title">Threshold reference</h2>
+              <dl class="sensor-threshold-list" id="sdThresholdList"></dl>
+            </div>
+            <div class="panel sensor-decision-panel">
+              <h2 class="panel-title">Decision support</h2>
+              <div class="sensor-decision-list" id="sdDecisionList"></div>
+            </div>
+          </div>
+
+          <p class="sensor-back">
+            <a href="index.html" class="sensor-back-link">← Back to dashboard</a>
+          </p>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/sensor-main.js"></script>
+  </body>
+</html>
